@@ -40,10 +40,11 @@ class HomePageTest(TestCase):
         self.assertTrue(response.content.strip().endswith(b'</html>'))
 
     def test_home_page_can_save_a_POST_request(self):
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST['item_text'] = '신규 작업 아이템'
-
-        response = home_page(request)
+        response = self.client.post('/', data={'item_text': '신규 작업 아이템'})
 
         self.assertIn('신규 작업 아이템', response.content.decode())
+        self.assertTemplateUsed(response, 'home.html')
+
+    def test_uses_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html')

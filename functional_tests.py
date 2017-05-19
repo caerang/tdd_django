@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest
-
+import time
 
 class NewVisitorTest(unittest.TestCase):
     def setUp(self):
@@ -24,12 +24,17 @@ class NewVisitorTest(unittest.TestCase):
 
         inputbox.send_keys('공작깃털 사기')
         inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('날 수 있도록 공작깃털 사용하기')
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
 
         table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_element_by_tag_name('tr')
-        self.assertTrue(
-            any(row.text == '1: 공작깃털 사기' for row in rows),
-        )
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn('1: 공작깃털 사기', [row.text for row in rows])
+        self.assertIn('2: 날 수 있도록 공작깃털 사용하기', [row.text for row in rows])
 
         self.fail('Finish the test!')
 
