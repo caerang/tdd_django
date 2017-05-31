@@ -11,40 +11,25 @@ import re
 
 class HomePageTest(TestCase):
 
-    @staticmethod
-    def remove_csrf(html_code):
-        csrf_regex = r'<input[^>]+csrfmiddlewaretoken[^>]+>'
-        return re.sub(csrf_regex, '', html_code)
+    def test_uses_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html')
 
-    def assertEqualExceptCSRF(self, html_code1, html_code2):
-        return self.assertEqual(
-            self.remove_csrf(html_code1),
-            self.remove_csrf(html_code2)
-        )
+    def test_can_save_a_POST_request(self):
+        response = self.client.post('/', data={'item_text': 'A new list item'})
 
-    def test_root_url_resolves_to_home_page_view(self):
-        found = resolve('/')
-        self.assertEqual(found.func, home_page)
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
 
-    def test_home_page_returns_correct_html(self):
-        request = HttpRequest()
-        response = home_page(request)
-        expected_html = render_to_string('home.html')
-        self.assertEqualExceptCSRF(response.content.decode(), expected_html)
+    def test_redirects_after_POST(self):
+        response = self.client.post('/', data={'item_text': 'A new list item'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/lists/the-only-list-in-the-world/')
 
-        self.assertTrue(response.content.startswith(b'<html>'))
-        self.assertIn(b'<title>To-Do lists</title>', response.content)
-        self.assertTrue(response.content.strip().endswith(b'</html>'))
-
-    # def test_home_page_can_save_a_POST_request(self):
-    #     response = self.client.post('/', data={'item_text': '신규 작업 아이템'})
-    #
-    #     self.assertIn('신규 작업 아이템', response.content.decode())
-    #     self.assertTemplateUsed(response, 'home.html')
-    #
-    # def test_uses_home_template(self):
-    #     response = self.client.get('/')
-    #     self.assertTemplateUsed(response, 'home.html')
+    def test_only_saves_items_when_necessary(self):
+        self.client.get('/')
+        self.assertEqual(Item.objects.count(), 0)
 
 
 class ItemModelTest(TestCase):
@@ -66,30 +51,14 @@ class ItemModelTest(TestCase):
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
         self.assertEqual(second_saved_item.text, 'Item the second')
 
-    def test_can_save_a_POST_request(self):
-        response = self.client.post('/', data={'item_text': 'A new list item'})
 
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'A new list item')
+class ListViewTest(TestCase):
 
-        # self.assertIn('A new list item', response.content.decode())
-        # self.assertTemplateUsed(response, 'home.html')
-
-    def test_redirects_after_POST(self):
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')
-
-    def test_only_saves_items_when_necessary(self):
-        self.client.get('/')
-        self.assertEqual(Item.objects.count(), 0)
-
-    def test_displays_all_list_items(self):
+    def test_displays_all_items(self):
         Item.objects.create(text='itemey 1')
         Item.objects.create(text='itemey 2')
 
-        response = self.client.get('/')
+        response = self.client.get('/lists/the-only-list-in-the-world/')
 
-        self.assertIn('itemey 1', response.content.decode())
-        self.assertIn('itemey 2', response.content.decode())
+        self.assertContains(response, 'itemey 1')
+        self.assertContains(response, 'itemey 2')

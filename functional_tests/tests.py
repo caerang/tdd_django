@@ -21,7 +21,6 @@ class NewVisitorTest(LiveServerTestCase):
         start_time = time.time()
         while True:
             try:
-                # table = self.browser.find_element_by_id('id_nothing')
                 table = self.browser.find_element_by_id('id_list_table')
                 rows = table.find_elements_by_tag_name('tr')
                 self.assertIn(row_text, [row.text for row in rows])
@@ -86,8 +85,10 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertRegex(edith_list_url, '/lists/.+')
 
         self.browser.quit()
-        self.browser = webdriver.Firefox()
         
+        self.browser = webdriver.Firefox()
+        # self.browser.implicitly_wait(3)
+
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers', page_text)
@@ -105,6 +106,3 @@ class NewVisitorTest(LiveServerTestCase):
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertIn('Buy mild', page_text)
-
-# if __name__ == '__main__':
-#     unittest.main(warnings='ignore')
