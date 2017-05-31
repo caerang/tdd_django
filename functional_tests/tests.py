@@ -39,7 +39,7 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element_by_id('id_new_item')
         self.assertEqual(
             inputbox.get_attribute('placeholder'),
-            '작업 아이템 입력')
+            'Enter a to-do item')
         inputbox.send_keys('공작깃털 사기')
         inputbox.send_keys(Keys.ENTER)
 
@@ -52,8 +52,6 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('1: 공작깃털 사기')
         self.wait_for_row_in_list_table('2: 날 수 있도록 공작깃털 사용하기')
 
-        self.fail('Finish the test!')
-
     def test_can_start_a_list_for_one_user(self):
         self.browser.get(self.live_server_url)
         self.assertIn('To-Do', self.browser.title)
@@ -63,7 +61,7 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element_by_id('id_new_item')
         self.assertEqual(
             inputbox.get_attribute('placeholder'),
-            '작업 아이템 입력')
+            'Enter a to-do item')
         inputbox.send_keys('Buy peacock feathers')
         inputbox.send_keys(Keys.ENTER)
 
@@ -87,7 +85,6 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.quit()
         
         self.browser = webdriver.Firefox()
-        # self.browser.implicitly_wait(3)
 
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
