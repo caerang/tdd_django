@@ -83,7 +83,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertRegex(edith_list_url, '/lists/.+')
 
         self.browser.quit()
-        
+
         self.browser = webdriver.Firefox()
 
         self.browser.get(self.live_server_url)
